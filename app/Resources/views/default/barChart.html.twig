@@ -15,10 +15,10 @@
     <div id="wrapper">
         <div id="container">
             <div id="welcome">
-                <h5>Математическое ожидание {{ expected_value | number_format(2, '.', ',')}}</h5>
-                <h5>Дисперсия {{ dispersion | number_format(5, '.', ',')}}</h5>
-                <h5>k {{ is_uniform | number_format(5, '.', ',')}}</h5>
-                <h5>Период {{ period | number_format(5, '.', ',')}}</h5>
+                <h5>Математическое ожидание {{ expected_value | number_format(3, '.', ',')}}</h5>
+                <h5>Дисперсия {{ dispersion | number_format(3, '.', ',')}}</h5>
+                <h5>k {{ is_uniform | number_format(3, '.', ',')}}</h5>
+                <h5>Период {{ period | number_format(3, '.', ',')}}</h5>
             </div>
 
             <div id="linechart" style="min-width: 400px; height: 400px; margin: 0 auto"></div>

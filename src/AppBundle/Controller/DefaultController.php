@@ -13,7 +13,7 @@ class DefaultController extends Controller
 {
 
     private $array = [];
-    const N = 100;
+    const N = 20000;
     /**
      * @Route("/", name="homepage")
      */
@@ -36,8 +36,6 @@ class DefaultController extends Controller
 
             $response = $this->forward('AppBundle:Default:showBarChart', array(
                 'random'  => $this->array,
-                'a' => (integer)$data['A'],
-                'm' => (integer)$data["M"]
             ));
             //return $this->redirectToRoute('bar_chart', array("random" => 5));
             return$response;
@@ -51,12 +49,13 @@ class DefaultController extends Controller
     /**
      * @Route("/bar_chart", name="bar_chart")
      */
-    public function showBarChartAction(Request $request, $random, $a, $m)
+    public function showBarChartAction(Request $request, $random)
     {
 
         $series = array(
             array(
-                "data" => $this->createBarChart($random))
+                "data" => $this->createBarChart($random),
+                'color' => '#008080')
         );
 
         $ob = new Highchart();
@@ -76,7 +75,7 @@ class DefaultController extends Controller
                 'expected_value'=> $this->getExpectedValue($random),
                 'dispersion' => $this->getDispersion($random),
                 'is_uniform' => $this->isUniform($random),
-                'period' => $this->getPeriod($random, $a, $m)]);
+                'period' => $this->getPeriod($random)]);
 
     }
 
@@ -114,7 +113,7 @@ class DefaultController extends Controller
                 }
             }
         }
-        unset($bar_chart[count($bar_chart)-1]);
+      //  unset($bar_chart[count($bar_chart)-1]);
         for ($i = 0; $i< count($bar_chart); $i++){
             $bar_chart[$i] /= count($random_array);
         }
@@ -134,7 +133,8 @@ class DefaultController extends Controller
     public  function getDispersion($random_array)
     {
         $dispersion = 0;
-        for($i = 0; $i<count($random_array); $i++){
+        $count = count($random_array);
+        for($i = 0; $i<$count; $i++){
             $dispersion += ($random_array[$i] - $this->getExpectedValue($random_array)) ** 2;
 
         }
@@ -147,6 +147,7 @@ class DefaultController extends Controller
         $max = max($random);
         $boundary_value = [];
         $r = $max - $min;
+
         $delta = (float)$r / (float)$k;
         if($delta == 0) {
             $boundary_value[] = min($random);
@@ -182,7 +183,6 @@ class DefaultController extends Controller
 
         $this->array[] = $rn / $m;
         if(count($this->array) > self::N){
-
             return $this->array;
         }
 
@@ -190,32 +190,37 @@ class DefaultController extends Controller
         $this->createRandom($rn, $a, $m, $count);
     }
 
-    private function getPeriod($random_array, $a, $m)
+    private function getPeriod($random_array)
     {
         $xv = $random_array[(count($random_array)-1)]; //поменять на 50000
         $i1 = $i2 = 0;
-        for($i = 0; $i < count($random_array); $i++){
-            if($xv == $random_array[$i]){
+
+        for($i = 0; $i < count($random_array); $i++) {
+            if ($xv == $random_array[$i]) {
                 $i1 = $i;
-                continue;
+                break;
             }
+        }
+        for($i = ($i1+1); $i < count($random_array); $i++){
             if($xv == $random_array[$i]){
                 $i2 = $i;
                 break;
             }
         }
+
+
         $p = 0;
         if($i1 < $i2){
             $p = $i2 - $i1;
         }
 
         $i3 = 0;
-      
-        $second_random = $this->createRandom($random_array[$p],$a, $m, 0 );
-        for($i = 0; $i < count($second_random); $i ++){
-            if(($i+$p) < count($second_random) && $second_random[$i] == $second_random[$i + $p]){
-                $i3 = $i;
-            }
+
+        for($i = 0; $i < count($random_array); $i ++){
+           if( ($i + $p) < count($random_array) && $random_array[$i] == $random_array[$i + $p]){
+               $i3 = $i;
+               break;
+           }
         }
 
         $l = $i3 + $p;
